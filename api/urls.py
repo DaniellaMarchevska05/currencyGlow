@@ -1,7 +1,7 @@
 # api/urls.py
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import RegisterView, UserBalanceView, frontend_view
+from .views import RegisterView, UserBalanceView, CurrencyExchangeView, ExchangeHistoryView, frontend_view
 
 urlpatterns = [
     # Frontend view
@@ -14,4 +14,6 @@ urlpatterns = [
 
     # API endpoints
     path('balance/', UserBalanceView.as_view(), name='balance'),
+    path('currency/', CurrencyExchangeView.as_view(), name='currency'),
+    path('history/', ExchangeHistoryView.as_view(), name='history'),
 ]

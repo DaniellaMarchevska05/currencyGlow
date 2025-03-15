@@ -101,6 +101,19 @@ TEMPLATES = [
     },
 ]
 
+# Ensure proper decimal serialization
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'COERCE_DECIMAL_TO_STRING': True,
+}
+
+
 WSGI_APPLICATION = 'currency_exchange_api.wsgi.application'
 
 
