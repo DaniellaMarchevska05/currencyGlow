@@ -1,0 +1,423 @@
+<!-- templates/api/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Exchange API Tester</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .section {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .result {
+            background-color: #e9e9e9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status.error {
+            color: red;
+        }
+        .status.success {
+            color: green;
+        }
+        #authStatus {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .authenticated {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .unauthenticated {
+            background-color: #f44336;
+            color: white;
+        }
+        #historyResults {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .logout {
+            background-color: #f44336;
+        }
+        .logout:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="authStatus" class="unauthenticated">Not Logged In</div>
+
+    <h1>Currency Exchange API Tester</h1>
+
+    <div class="section" id="authSection">
+        <h2>Authentication</h2>
+        <div id="registerForm">
+            <h3>Register</h3>
+            <input type="text" id="regUsername" placeholder="Username">
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPassword" placeholder="Password">
+            <input type="password" id="regPasswordConfirm" placeholder="Confirm Password">
+            <button onclick="register()">Register</button>
+            <div id="registerResult" class="result"></div>
+        </div>
+
+        <div id="loginForm">
+            <h3>Login</h3>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <div id="logoutSection" style="display: none;">
+            <button class="logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>User Balance</h2>
+        <button onclick="checkBalance()">Check Balance</button>
+        <div id="balanceResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Currency Exchange</h2>
+        <select id="currencyCode">
+            <option value="USD">USD - US Dollar</option>
+            <option value="EUR">EUR - Euro</option>
+            <option value="GBP">GBP - British Pound</option>
+            <option value="JPY">JPY - Japanese Yen</option>
+            <option value="CHF">CHF - Swiss Franc</option>
+        </select>
+        <button onclick="getCurrencyRate()">Get Exchange Rate</button>
+        <div id="currencyResult" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>Exchange History</h2>
+        <div>
+            <input type="text" id="filterCurrency" placeholder="Filter by currency (e.g. USD)">
+            <input type="date" id="filterDate" placeholder="Filter by date">
+            <button onclick="getHistory()">Get History</button>
+        </div>
+        <div id="historyResults" class="result"></div>
+    </div>
+
+    <script>
+        let accessToken = localStorage.getItem('accessToken');
+        let refreshToken = localStorage.getItem('refreshToken');
+        const API_BASE_URL = '/api';
+
+        // Check if user is authenticated on page load
+        window.onload = function() {
+            updateAuthStatus();
+        };
+
+        function updateAuthStatus() {
+            const authStatus = document.getElementById('authStatus');
+            const logoutSection = document.getElementById('logoutSection');
+
+            if (accessToken) {
+                authStatus.textContent = 'Logged In';
+                authStatus.className = 'authenticated';
+                logoutSection.style.display = 'block';
+            } else {
+                authStatus.textContent = 'Not Logged In';
+                authStatus.className = 'unauthenticated';
+                logoutSection.style.display = 'none';
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            const resultDiv = document.getElementById('registerResult');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/register/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password,
+                        password_confirm: passwordConfirm
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="status success">Registration successful!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Registration failed!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/token/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    accessToken = data.access;
+                    refreshToken = data.refresh;
+
+                    // Store tokens
+                    localStorage.setItem('accessToken', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
+
+                    resultDiv.innerHTML = `<div class="status success">Login successful!</div>`;
+                    updateAuthStatus();
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Login failed!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            accessToken = null;
+            refreshToken = null;
+            updateAuthStatus();
+
+            // Clear all result divs
+            document.getElementById('loginResult').innerHTML = '';
+            document.getElementById('balanceResult').innerHTML = '';
+            document.getElementById('currencyResult').innerHTML = '';
+            document.getElementById('historyResults').innerHTML = '';
+
+            document.getElementById('loginResult').innerHTML = '<div class="status success">Logged out successfully</div>';
+        }
+
+        async function checkBalance() {
+            const resultDiv = document.getElementById('balanceResult');
+
+            if (!accessToken) {
+                resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/balance/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (response.status === 401) {
+                    // Try to refresh the token
+                    const refreshed = await refreshAuthToken();
+                    if (refreshed) {
+                        return checkBalance();  // Try again with new token
+                    } else {
+                        resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
+                        return;
+                    }
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function getCurrencyRate() {
+            const currencyCode = document.getElementById('currencyCode').value;
+            const resultDiv = document.getElementById('currencyResult');
+
+            if (!accessToken) {
+                resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/currency/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                    body: JSON.stringify({ currency_code: currencyCode }),
+                });
+
+                if (response.status === 401) {
+                    // Try to refresh the token
+                    const refreshed = await refreshAuthToken();
+                    if (refreshed) {
+                        return getCurrencyRate();  // Try again with new token
+                    } else {
+                        resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
+                        return;
+                    }
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function getHistory() {
+            const filterCurrency = document.getElementById('filterCurrency').value;
+            const filterDate = document.getElementById('filterDate').value;
+            const resultDiv = document.getElementById('historyResults');
+
+            if (!accessToken) {
+                resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+                return;
+            }
+
+            let url = `${API_BASE_URL}/history/?`;
+            if (filterCurrency) {
+                url += `currency=${filterCurrency}&`;
+            }
+            if (filterDate) {
+                url += `date=${filterDate}`;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (response.status === 401) {
+                    // Try to refresh the token
+                    const refreshed = await refreshAuthToken();
+                    if (refreshed) {
+                        return getHistory();  // Try again with new token
+                    } else {
+                        resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
+                        return;
+                    }
+                }
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                          <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function refreshAuthToken() {
+            if (!refreshToken) return false;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/token/refresh/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ refresh: refreshToken }),
+                });
+
+                if (!response.ok) return false;
+
+                const data = await response.json();
+                accessToken = data.access;
+                localStorage.setItem('accessToken', accessToken);
+                return true;
+            } catch (error) {
+                console.error("Token refresh error:", error);
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>
