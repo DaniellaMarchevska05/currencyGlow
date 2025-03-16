@@ -4,66 +4,148 @@
 {% block title %}Currency Exchange API - Currency Exchange{% endblock %}
 {% block currency_active %}class="active"{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .currency-result-card {
+        margin-top: 30px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 16px;
+        padding: 0;
+        overflow: hidden;
+        display: none;
+    }
+
+    .currency-result-header {
+        padding: 15px 20px;
+        background: rgba(126, 95, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .currency-result-body {
+        padding: 20px;
+    }
+
+    .currency-rate {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 15px 0;
+        color: white;
+    }
+
+    .currency-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .currency-meta-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px 15px;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .currency-meta-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+    }
+
+    .currency-meta-value {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .currency-selector {
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>Currency Exchange</h1>
+<h1>Currency Exchange Rates</h1>
 
 <div class="section">
     <h2>Get Exchange Rate</h2>
-    <p>Each request costs 1 coin from your balance.</p>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Select a currency to see its current exchange rate against Ukrainian Hryvnia (UAH)</p>
 
-    <select id="currencyCode">
-        <!-- Will be populated with JavaScript -->
-    </select>
-    <button onclick="getCurrencyRate()">Get Exchange Rate</button>
-    <div id="currencyResult" class="result"></div>
+    <div class="currency-selector">
+        <label for="currencyCode">Select Currency</label>
+        <select id="currencyCode">
+            <!-- Will be populated with JavaScript -->
+        </select>
+    </div>
+
+    <button id="getRateButton" onclick="getCurrencyRate()">Get Exchange Rate (costs 1 credit)</button>
+    <div id="loadingIndicator" style="display: none; margin-top: 15px; color: var(--text-muted);">Loading exchange rate...</div>
+
+    <div id="currencyResult" class="currency-result-card">
+        <div class="currency-result-header">
+            <div id="resultCurrencyName">US Dollar (USD)</div>
+            <div id="resultStatus" style="font-size: 14px; color: var(--success-color);">Success</div>
+        </div>
+
+        <div class="currency-result-body">
+            <div style="color: var(--text-muted);">Exchange Rate:</div>
+            <div class="currency-rate" id="resultRate">1 USD = 36.74 UAH</div>
+
+            <div class="currency-meta">
+                <div class="currency-meta-item">
+                    <div class="currency-meta-label">REQUEST TIME</div>
+                    <div class="currency-meta-value" id="resultTime">2023-07-22 14:30:00</div>
+                </div>
+                <div class="currency-meta-item">
+                    <div class="currency-meta-label">CREDITS REMAINING</div>
+                    <div class="currency-meta-value" id="resultBalance">999</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorResult" class="result" style="display: none;"></div>
+</div>
+
+<div class="section">
+    <h2>Available Currencies</h2>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">We support exchange rates for 40+ global currencies</p>
+
+    <div id="currencyGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px;">
+        <!-- Will be filled with JavaScript -->
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-    // Currency data with codes, names and symbols
-    const CURRENCIES = [
-        { code: "USD", name: "US Dollar", symbol: "$" },
-        { code: "EUR", name: "Euro", symbol: "€" },
-        { code: "GBP", name: "British Pound", symbol: "£" },
-        { code: "JPY", name: "Japanese Yen", symbol: "¥" },
-        { code: "AUD", name: "Australian Dollar", symbol: "A$" },
-        { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
-        { code: "CHF", name: "Swiss Franc", symbol: "CHF" },
-        { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
-        { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
-        { code: "NZD", name: "New Zealand Dollar", symbol: "NZ$" },
-        { code: "SEK", name: "Swedish Krona", symbol: "kr" },
-        { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
-        { code: "NOK", name: "Norwegian Krone", symbol: "kr" },
-        { code: "MXN", name: "Mexican Peso", symbol: "Mex$" },
-        { code: "INR", name: "Indian Rupee", symbol: "₹" },
-        { code: "BRL", name: "Brazilian Real", symbol: "R$" },
-        { code: "RUB", name: "Russian Ruble", symbol: "₽" },
-        { code: "ZAR", name: "South African Rand", symbol: "R" },
-        { code: "TRY", name: "Turkish Lira", symbol: "₺" },
-        { code: "PLN", name: "Polish Złoty", symbol: "zł" },
-        { code: "THB", name: "Thai Baht", symbol: "฿" },
-        { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
-        { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
-        { code: "CZK", name: "Czech Koruna", symbol: "Kč" },
-        { code: "ILS", name: "Israeli New Shekel", symbol: "₪" },
-        { code: "KRW", name: "South Korean Won", symbol: "₩" },
-        { code: "AED", name: "United Arab Emirates Dirham", symbol: "د.إ" },
-        { code: "CLP", name: "Chilean Peso", symbol: "CLP$" },
-        { code: "PHP", name: "Philippine Peso", symbol: "₱" },
-        { code: "MYR", name: "Malaysian Ringgit", symbol: "RM" },
-        { code: "COP", name: "Colombian Peso", symbol: "COL$" },
-        { code: "SAR", name: "Saudi Riyal", symbol: "﷼" },
-        { code: "RON", name: "Romanian Leu", symbol: "lei" },
-        { code: "DKK", name: "Danish Krone", symbol: "kr" },
-        { code: "BGN", name: "Bulgarian Lev", symbol: "лв" },
-        { code: "HRK", name: "Croatian Kuna", symbol: "kn" },
-        { code: "MAD", name: "Moroccan Dirham", symbol: "د.م." },
-        { code: "ARS", name: "Argentine Peso", symbol: "AR$" },
-        { code: "PEN", name: "Peruvian Sol", symbol: "S/." },
-        { code: "EGP", name: "Egyptian Pound", symbol: "E£" }
-    ];
+    const currencyGrid = document.getElementById('currencyGrid');
+
+    // Populate currency grid
+    function populateCurrencyGrid() {
+        // Sort currencies alphabetically by code
+        const sortedCurrencies = [...CURRENCIES].sort((a, b) => a.code.localeCompare(b.code));
+
+        sortedCurrencies.forEach(currency => {
+            const currencyItem = document.createElement('div');
+            currencyItem.style.padding = "10px";
+            currencyItem.style.borderRadius = "8px";
+            currencyItem.style.background = "rgba(255, 255, 255, 0.03)";
+            currencyItem.style.border = "1px solid rgba(255, 255, 255, 0.05)";
+
+            currencyItem.innerHTML = `
+                <div style="font-weight: 500;">${currency.code}</div>
+                <div style="color: var(--text-muted); font-size: 12px;">${currency.name}</div>
+                <div style="margin-top: 5px; font-size: 14px;">${currency.symbol}</div>
+            `;
+
+            currencyGrid.appendChild(currencyItem);
+        });
+    }
 
     // Populate currency select dropdown when the page loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -79,16 +161,30 @@
             option.textContent = `${currency.code} - ${currency.name} (${currency.symbol})`;
             currencySelect.appendChild(option);
         });
+
+        // Populate the currency grid
+        populateCurrencyGrid();
     });
 
     async function getCurrencyRate() {
         const currencyCode = document.getElementById('currencyCode').value;
-        const resultDiv = document.getElementById('currencyResult');
+        const resultCard = document.getElementById('currencyResult');
+        const errorDiv = document.getElementById('errorResult');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const getRateButton = document.getElementById('getRateButton');
 
         if (!accessToken) {
-            resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+            errorDiv.style.display = "block";
+            resultCard.style.display = "none";
+            errorDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
             return;
         }
+
+        // Reset UI and show loading
+        errorDiv.style.display = "none";
+        resultCard.style.display = "none";
+        loadingIndicator.style.display = "block";
+        getRateButton.disabled = true;
 
         try {
             const response = await fetch(`${API_BASE_URL}/currency/`, {
@@ -100,13 +196,18 @@
                 body: JSON.stringify({ currency_code: currencyCode }),
             });
 
+            // Hide loading
+            loadingIndicator.style.display = "none";
+            getRateButton.disabled = false;
+
             if (response.status === 401) {
                 // Try to refresh the token
                 const refreshed = await refreshAuthToken();
                 if (refreshed) {
                     return getCurrencyRate();  // Try again with new token
                 } else {
-                    resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
+                    errorDiv.style.display = "block";
+                    errorDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
                     return;
                 }
             }
@@ -116,18 +217,37 @@
             if (response.ok) {
                 // Find the currency object for this code
                 const currency = CURRENCIES.find(c => c.code === data.currency_code) ||
-                                 { code: data.currency_code, name: data.currency_code, symbol: "" };
+                               { code: data.currency_code, name: data.currency_code, symbol: "" };
 
-                resultDiv.innerHTML = `<div class="status success">Exchange Rate for ${currency.name} (${currency.code}):</div>
-                                      <div class="status success">1 ${currency.code} ${currency.symbol} = ${data.rate} UAH ₴</div>
-                                      <div class="status">Balance remaining: ${data.balance_remaining} coins</div>
-                                      <div class="status">Request time: ${new Date(data.created_at).toLocaleString()}</div>`;
+                // Update result card
+                document.getElementById('resultCurrencyName').textContent = `${currency.name} (${currency.code})`;
+                document.getElementById('resultStatus').textContent = "Success";
+                document.getElementById('resultRate').textContent = `1 ${currency.code} ${currency.symbol} = ${data.rate} UAH ₴`;
+                document.getElementById('resultTime').textContent = new Date(data.created_at).toLocaleString();
+                document.getElementById('resultBalance').textContent = data.balance_remaining;
+
+                // Show the result card
+                resultCard.style.display = "block";
+
+                // Change header color based on remaining balance
+                const header = document.querySelector('.currency-result-header');
+                if (data.balance_remaining <= 10) {
+                    header.style.background = "rgba(255, 42, 109, 0.2)";
+                } else if (data.balance_remaining <= 100) {
+                    header.style.background = "rgba(254, 83, 187, 0.2)";
+                } else {
+                    header.style.background = "rgba(126, 95, 255, 0.2)";
+                }
             } else {
-                resultDiv.innerHTML = `<div class="status error">Request failed!</div>
-                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                errorDiv.style.display = "block";
+                errorDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                    <pre>${JSON.stringify(data, null, 2)}</pre>`;
             }
         } catch (error) {
-            resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+            loadingIndicator.style.display = "none";
+            getRateButton.disabled = false;
+            errorDiv.style.display = "block";
+            errorDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
         }
     }
 </script>

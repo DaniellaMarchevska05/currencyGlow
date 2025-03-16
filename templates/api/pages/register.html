@@ -5,26 +5,28 @@
 {% block register_active %}class="active"{% endblock %}
 
 {% block content %}
-<h1>Register/Login</h1>
+<h1>Account Access</h1>
 
 <div class="section" id="registerSection">
-    <h2>Register</h2>
+    <h2>Create Account</h2>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Register for a new account and receive 1000 coins to start making requests.</p>
+
     <form id="registerForm" onsubmit="return validateAndRegister(event)">
         <div class="form-group">
             <label for="regUsername">Username <span class="required">*</span></label>
-            <input type="text" id="regUsername" placeholder="Username" required>
+            <input type="text" id="regUsername" placeholder="Choose a username" required>
             <div class="error-message" id="regUsernameError"></div>
         </div>
 
         <div class="form-group">
             <label for="regEmail">Email <span class="required">*</span></label>
-            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="email" id="regEmail" placeholder="Your email address" required>
             <div class="error-message" id="regEmailError"></div>
         </div>
 
         <div class="form-group">
             <label for="regPassword">Password <span class="required">*</span></label>
-            <input type="password" id="regPassword" placeholder="Password" required>
+            <input type="password" id="regPassword" placeholder="Create a strong password" required>
             <div class="password-requirements">
                 Password must:
                 <ul>
@@ -40,27 +42,29 @@
 
         <div class="form-group">
             <label for="regPasswordConfirm">Confirm Password <span class="required">*</span></label>
-            <input type="password" id="regPasswordConfirm" placeholder="Confirm Password" required>
+            <input type="password" id="regPasswordConfirm" placeholder="Confirm your password" required>
             <div class="error-message" id="regPasswordConfirmError"></div>
         </div>
 
-        <button type="submit">Register</button>
+        <button type="submit">Create Account</button>
     </form>
     <div id="registerResult" class="result"></div>
 </div>
 
 <div class="section" id="loginSection">
     <h2>Login</h2>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Already have an account? Sign in to continue.</p>
+
     <form id="loginForm" onsubmit="return validateAndLogin(event)">
         <div class="form-group">
             <label for="username">Username <span class="required">*</span></label>
-            <input type="text" id="username" placeholder="Username" required>
+            <input type="text" id="username" placeholder="Your username" required>
             <div class="error-message" id="usernameError"></div>
         </div>
 
         <div class="form-group">
             <label for="password">Password <span class="required">*</span></label>
-            <input type="password" id="password" placeholder="Password" required>
+            <input type="password" id="password" placeholder="Your password" required>
             <div class="error-message" id="passwordError"></div>
         </div>
 
@@ -68,53 +72,6 @@
     </form>
     <div id="loginResult" class="result"></div>
 </div>
-{% endblock %}
-
-{% block extra_styles %}
-<style>
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    .error-message {
-        color: #f44336;
-        font-size: 0.9em;
-        margin-top: 5px;
-        min-height: 1em;
-    }
-
-    .password-requirements {
-        font-size: 0.9em;
-        margin-top: 5px;
-        background-color: #f8f8f8;
-        padding: 10px;
-        border-radius: 4px;
-    }
-
-    .password-requirements ul {
-        margin: 5px 0 0 20px;
-        padding: 0;
-    }
-
-    .valid-requirement {
-        color: #4CAF50;
-        position: relative;
-    }
-
-    .invalid-requirement {
-        color: #f44336;
-    }
-
-    .required {
-        color: #f44336;
-    }
-</style>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -365,6 +322,8 @@
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const resultDiv = document.getElementById('loginResult');
+
+        resultDiv.innerHTML = `<div class="status">Logging in...</div>`;
 
         try {
             const response = await fetch(`${API_BASE_URL}/token/`, {

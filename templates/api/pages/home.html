@@ -7,25 +7,78 @@
 {% block content %}
 <h1>Currency Exchange API</h1>
 <div class="section">
-    <h2>Welcome to the Currency Exchange API</h2>
-    <p>This application allows you to:</p>
-    <ul>
-        <li>Register and login to get access to the API</li>
-        <li>Check your balance (each user starts with 1000 coins)</li>
-        <li>Get currency exchange rates to UAH</li>
-        <li>View your exchange rate request history</li>
-    </ul>
-    <p>Each exchange rate request costs 1 coin from your balance.</p>
+    <h2>Welcome to CurrencyGlow</h2>
+    <p>Your premium currency exchange rate platform with a sleek, modern interface and powerful features.</p>
+
+    <div style="margin: 30px 0; text-align: center;">
+        <div style="font-size: 72px; margin-bottom: 10px; text-shadow: 0 0 20px var(--accent-primary);">💸</div>
+        <div style="font-size: 18px; color: var(--text-muted);">Real-time exchange rates at your fingertips</div>
+    </div>
+
+    <h2>Key Features</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 25px;">
+        <div style="background: rgba(126, 95, 255, 0.1); padding: 20px; border-radius: 10px; border-left: 3px solid var(--accent-primary);">
+            <div style="font-weight: 600; margin-bottom: 10px;">40+ Currencies</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Access exchange rates for all major world currencies</div>
+        </div>
+
+        <div style="background: rgba(8, 247, 254, 0.1); padding: 20px; border-radius: 10px; border-left: 3px solid var(--accent-secondary);">
+            <div style="font-weight: 600; margin-bottom: 10px;">Real-time Data</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Up-to-date exchange rates from reliable sources</div>
+        </div>
+
+        <div style="background: rgba(254, 83, 187, 0.1); padding: 20px; border-radius: 10px; border-left: 3px solid var(--accent-tertiary);">
+            <div style="font-weight: 600; margin-bottom: 10px;">Request History</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Track and filter your previous exchange rate requests</div>
+        </div>
+
+        <div style="background: rgba(0, 255, 157, 0.1); padding: 20px; border-radius: 10px; border-left: 3px solid var(--success-color);">
+            <div style="font-weight: 600; margin-bottom: 10px;">Credit System</div>
+            <div style="color: var(--text-muted); font-size: 14px;">Each new user starts with 1000 credits</div>
+        </div>
+    </div>
 </div>
 
 <div class="section">
     <h2>Getting Started</h2>
-    <p>To begin using the API:</p>
-    <ol>
-        <li>Go to the <a href="/register/">Register/Login</a> page to create an account or login</li>
-        <li>Once logged in, check your <a href="/balance/">Balance</a></li>
-        <li>Make currency exchange requests on the <a href="/currency/">Currency Exchange</a> page</li>
-        <li>View your request history on the <a href="/history/">History</a> page</li>
-    </ol>
+    <p>Follow these simple steps to begin using our currency exchange service:</p>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="background: var(--accent-primary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">1</div>
+            <div>
+                <div style="font-weight: 500; margin-bottom: 5px;">Register an Account</div>
+                <div style="color: var(--text-muted); font-size: 14px;">Create a new account to receive your initial 1000 coins</div>
+                <a href="/register/" style="display: inline-block; margin-top: 8px; color: var(--accent-primary); text-decoration: none; font-size: 14px; font-weight: 500;">Register Now →</a>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="background: var(--accent-secondary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">2</div>
+            <div>
+                <div style="font-weight: 500; margin-bottom: 5px;">Check Your Balance</div>
+                <div style="color: var(--text-muted); font-size: 14px;">Verify your coin balance before making requests</div>
+                <a href="/balance/" style="display: inline-block; margin-top: 8px; color: var(--accent-secondary); text-decoration: none; font-size: 14px; font-weight: 500;">View Balance →</a>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="background: var(--accent-tertiary); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">3</div>
+            <div>
+                <div style="font-weight: 500; margin-bottom: 5px;">Make Currency Exchange Requests</div>
+                <div style="color: var(--text-muted); font-size: 14px;">Select a currency and get its current exchange rate (costs 1 coin per request)</div>
+                <a href="/currency/" style="display: inline-block; margin-top: 8px; color: var(--accent-tertiary); text-decoration: none; font-size: 14px; font-weight: 500;">Get Rates →</a>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="background: var(--success-color); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; flex-shrink: 0;">4</div>
+            <div>
+                <div style="font-weight: 500; margin-bottom: 5px;">View Your Request History</div>
+                <div style="color: var(--text-muted); font-size: 14px;">Track all your previous exchange rate requests with filtering options</div>
+                <a href="/history/" style="display: inline-block; margin-top: 8px; color: var(--success-color); text-decoration: none; font-size: 14px; font-weight: 500;">View History →</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

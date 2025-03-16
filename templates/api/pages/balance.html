@@ -5,24 +5,57 @@
 {% block balance_active %}class="active"{% endblock %}
 
 {% block content %}
-<h1>User Balance</h1>
+<h1>Your Balance</h1>
 
 <div class="section">
-    <h2>Your Current Balance</h2>
-    <button onclick="checkBalance()">Check Balance</button>
-    <div id="balanceResult" class="result"></div>
+    <div style="text-align: center; padding: 20px 0;">
+        <div id="balanceCard" style="background: rgba(126, 95, 255, 0.1); border-radius: 16px; padding: 40px; display: inline-block; min-width: 300px;">
+            <div style="font-size: 16px; color: var(--text-muted); margin-bottom: 15px;">Available Credits</div>
+            <div id="balanceAmount" style="font-size: 56px; font-weight: 700; margin-bottom: 10px;">-</div>
+            <div id="username" style="color: var(--text-muted); font-size: 14px;">Loading...</div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button onclick="checkBalance()">Refresh Balance</button>
+    </div>
+
+    <div id="balanceResult" class="result" style="display: none;"></div>
+
+    <div style="margin-top: 40px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 20px;">
+        <h3 style="margin-top: 0;">About Your Balance</h3>
+        <ul style="margin-top: 15px; color: var(--text-muted);">
+            <li>Each new user receives 1000 credits upon registration</li>
+            <li>Each currency exchange rate request costs 1 credit</li>
+            <li>When your balance reaches 0, you won't be able to make more requests</li>
+            <li>You can view your request history in the History section</li>
+        </ul>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
     async function checkBalance() {
+        const balanceAmount = document.getElementById('balanceAmount');
+        const usernameElement = document.getElementById('username');
+        const balanceCard = document.getElementById('balanceCard');
         const resultDiv = document.getElementById('balanceResult');
 
         if (!accessToken) {
-            resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+            balanceAmount.textContent = "-";
+            usernameElement.textContent = "Please log in first";
+            balanceCard.style.background = "rgba(255, 42, 109, 0.1)";
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `<div class="status error">Please log in to check your balance</div>`;
             return;
         }
+
+        // Reset state
+        balanceAmount.textContent = "Loading...";
+        usernameElement.textContent = "";
+        balanceCard.style.background = "rgba(126, 95, 255, 0.1)";
+        resultDiv.style.display = "none";
 
         try {
             const response = await fetch(`${API_BASE_URL}/balance/`, {
@@ -38,6 +71,10 @@
                 if (refreshed) {
                     return checkBalance();  // Try again with new token
                 } else {
+                    balanceAmount.textContent = "-";
+                    usernameElement.textContent = "Session expired";
+                    balanceCard.style.background = "rgba(255, 42, 109, 0.1)";
+                    resultDiv.style.display = "block";
                     resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
                     return;
                 }
@@ -46,13 +83,30 @@
             const data = await response.json();
 
             if (response.ok) {
-                resultDiv.innerHTML = `<div class="status success">User: ${data.username}</div>
-                                      <div class="status success">Balance: ${data.balance} coins</div>`;
+                balanceAmount.textContent = data.balance;
+                usernameElement.textContent = `@${data.username}`;
+
+                // Change background color based on balance
+                if (data.balance <= 10) {
+                    balanceCard.style.background = "rgba(255, 42, 109, 0.1)";
+                } else if (data.balance <= 100) {
+                    balanceCard.style.background = "rgba(254, 83, 187, 0.1)";
+                } else {
+                    balanceCard.style.background = "rgba(0, 255, 157, 0.1)";
+                }
             } else {
+                balanceAmount.textContent = "Error";
+                usernameElement.textContent = "Could not load balance";
+                balanceCard.style.background = "rgba(255, 42, 109, 0.1)";
+                resultDiv.style.display = "block";
                 resultDiv.innerHTML = `<div class="status error">Request failed!</div>
                                       <pre>${JSON.stringify(data, null, 2)}</pre>`;
             }
         } catch (error) {
+            balanceAmount.textContent = "Error";
+            usernameElement.textContent = "Could not load balance";
+            balanceCard.style.background = "rgba(255, 42, 109, 0.1)";
+            resultDiv.style.display = "block";
             resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
         }
     }
