@@ -12,15 +12,7 @@
     <p>Each request costs 1 coin from your balance.</p>
 
     <select id="currencyCode">
-        <option value="USD">USD - US Dollar</option>
-        <option value="EUR">EUR - Euro</option>
-        <option value="GBP">GBP - British Pound</option>
-        <option value="JPY">JPY - Japanese Yen</option>
-        <option value="CHF">CHF - Swiss Franc</option>
-        <option value="AUD">AUD - Australian Dollar</option>
-        <option value="CAD">CAD - Canadian Dollar</option>
-        <option value="CNY">CNY - Chinese Yuan</option>
-        <option value="PLN">PLN - Polish Zloty</option>
+        <!-- Will be populated with JavaScript -->
     </select>
     <button onclick="getCurrencyRate()">Get Exchange Rate</button>
     <div id="currencyResult" class="result"></div>
@@ -29,6 +21,66 @@
 
 {% block extra_scripts %}
 <script>
+    // Currency data with codes, names and symbols
+    const CURRENCIES = [
+        { code: "USD", name: "US Dollar", symbol: "$" },
+        { code: "EUR", name: "Euro", symbol: "€" },
+        { code: "GBP", name: "British Pound", symbol: "£" },
+        { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+        { code: "AUD", name: "Australian Dollar", symbol: "A$" },
+        { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
+        { code: "CHF", name: "Swiss Franc", symbol: "CHF" },
+        { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+        { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
+        { code: "NZD", name: "New Zealand Dollar", symbol: "NZ$" },
+        { code: "SEK", name: "Swedish Krona", symbol: "kr" },
+        { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
+        { code: "NOK", name: "Norwegian Krone", symbol: "kr" },
+        { code: "MXN", name: "Mexican Peso", symbol: "Mex$" },
+        { code: "INR", name: "Indian Rupee", symbol: "₹" },
+        { code: "BRL", name: "Brazilian Real", symbol: "R$" },
+        { code: "RUB", name: "Russian Ruble", symbol: "₽" },
+        { code: "ZAR", name: "South African Rand", symbol: "R" },
+        { code: "TRY", name: "Turkish Lira", symbol: "₺" },
+        { code: "PLN", name: "Polish Złoty", symbol: "zł" },
+        { code: "THB", name: "Thai Baht", symbol: "฿" },
+        { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
+        { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
+        { code: "CZK", name: "Czech Koruna", symbol: "Kč" },
+        { code: "ILS", name: "Israeli New Shekel", symbol: "₪" },
+        { code: "KRW", name: "South Korean Won", symbol: "₩" },
+        { code: "AED", name: "United Arab Emirates Dirham", symbol: "د.إ" },
+        { code: "CLP", name: "Chilean Peso", symbol: "CLP$" },
+        { code: "PHP", name: "Philippine Peso", symbol: "₱" },
+        { code: "MYR", name: "Malaysian Ringgit", symbol: "RM" },
+        { code: "COP", name: "Colombian Peso", symbol: "COL$" },
+        { code: "SAR", name: "Saudi Riyal", symbol: "﷼" },
+        { code: "RON", name: "Romanian Leu", symbol: "lei" },
+        { code: "DKK", name: "Danish Krone", symbol: "kr" },
+        { code: "BGN", name: "Bulgarian Lev", symbol: "лв" },
+        { code: "HRK", name: "Croatian Kuna", symbol: "kn" },
+        { code: "MAD", name: "Moroccan Dirham", symbol: "د.م." },
+        { code: "ARS", name: "Argentine Peso", symbol: "AR$" },
+        { code: "PEN", name: "Peruvian Sol", symbol: "S/." },
+        { code: "EGP", name: "Egyptian Pound", symbol: "E£" }
+    ];
+
+    // Populate currency select dropdown when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currencySelect = document.getElementById('currencyCode');
+
+        // Sort currencies alphabetically by name
+        CURRENCIES.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Add options to select dropdown
+        CURRENCIES.forEach(currency => {
+            const option = document.createElement('option');
+            option.value = currency.code;
+            option.textContent = `${currency.code} - ${currency.name} (${currency.symbol})`;
+            currencySelect.appendChild(option);
+        });
+    });
+
     async function getCurrencyRate() {
         const currencyCode = document.getElementById('currencyCode').value;
         const resultDiv = document.getElementById('currencyResult');
@@ -62,8 +114,12 @@
             const data = await response.json();
 
             if (response.ok) {
-                resultDiv.innerHTML = `<div class="status success">Exchange Rate for ${data.currency_code}:</div>
-                                      <div class="status success">1 ${data.currency_code} = ${data.rate} UAH</div>
+                // Find the currency object for this code
+                const currency = CURRENCIES.find(c => c.code === data.currency_code) ||
+                                 { code: data.currency_code, name: data.currency_code, symbol: "" };
+
+                resultDiv.innerHTML = `<div class="status success">Exchange Rate for ${currency.name} (${currency.code}):</div>
+                                      <div class="status success">1 ${currency.code} ${currency.symbol} = ${data.rate} UAH ₴</div>
                                       <div class="status">Balance remaining: ${data.balance_remaining} coins</div>
                                       <div class="status">Request time: ${new Date(data.created_at).toLocaleString()}</div>`;
             } else {

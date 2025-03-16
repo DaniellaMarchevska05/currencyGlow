@@ -9,25 +9,289 @@
 
 <div class="section" id="registerSection">
     <h2>Register</h2>
-    <input type="text" id="regUsername" placeholder="Username">
-    <input type="email" id="regEmail" placeholder="Email">
-    <input type="password" id="regPassword" placeholder="Password">
-    <input type="password" id="regPasswordConfirm" placeholder="Confirm Password">
-    <button onclick="register()">Register</button>
+    <form id="registerForm" onsubmit="return validateAndRegister(event)">
+        <div class="form-group">
+            <label for="regUsername">Username <span class="required">*</span></label>
+            <input type="text" id="regUsername" placeholder="Username" required>
+            <div class="error-message" id="regUsernameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="regEmail">Email <span class="required">*</span></label>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <div class="error-message" id="regEmailError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="regPassword">Password <span class="required">*</span></label>
+            <input type="password" id="regPassword" placeholder="Password" required>
+            <div class="password-requirements">
+                Password must:
+                <ul>
+                    <li id="length">Be at least 8 characters long</li>
+                    <li id="uppercase">Contain at least one uppercase letter</li>
+                    <li id="lowercase">Contain at least one lowercase letter</li>
+                    <li id="number">Contain at least one number</li>
+                    <li id="special">Contain at least one special character (!@#$%^&*)</li>
+                </ul>
+            </div>
+            <div class="error-message" id="regPasswordError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="regPasswordConfirm">Confirm Password <span class="required">*</span></label>
+            <input type="password" id="regPasswordConfirm" placeholder="Confirm Password" required>
+            <div class="error-message" id="regPasswordConfirmError"></div>
+        </div>
+
+        <button type="submit">Register</button>
+    </form>
     <div id="registerResult" class="result"></div>
 </div>
 
 <div class="section" id="loginSection">
     <h2>Login</h2>
-    <input type="text" id="username" placeholder="Username">
-    <input type="password" id="password" placeholder="Password">
-    <button onclick="login()">Login</button>
+    <form id="loginForm" onsubmit="return validateAndLogin(event)">
+        <div class="form-group">
+            <label for="username">Username <span class="required">*</span></label>
+            <input type="text" id="username" placeholder="Username" required>
+            <div class="error-message" id="usernameError"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password <span class="required">*</span></label>
+            <input type="password" id="password" placeholder="Password" required>
+            <div class="error-message" id="passwordError"></div>
+        </div>
+
+        <button type="submit">Login</button>
+    </form>
     <div id="loginResult" class="result"></div>
 </div>
 {% endblock %}
 
+{% block extra_styles %}
+<style>
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .error-message {
+        color: #f44336;
+        font-size: 0.9em;
+        margin-top: 5px;
+        min-height: 1em;
+    }
+
+    .password-requirements {
+        font-size: 0.9em;
+        margin-top: 5px;
+        background-color: #f8f8f8;
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .password-requirements ul {
+        margin: 5px 0 0 20px;
+        padding: 0;
+    }
+
+    .valid-requirement {
+        color: #4CAF50;
+        position: relative;
+    }
+
+    .invalid-requirement {
+        color: #f44336;
+    }
+
+    .required {
+        color: #f44336;
+    }
+</style>
+{% endblock %}
+
 {% block extra_scripts %}
 <script>
+    // Password validation
+    const passwordInput = document.getElementById('regPassword');
+    passwordInput.addEventListener('input', validatePassword);
+
+    function validatePassword() {
+        const password = passwordInput.value;
+
+        // Check each requirement
+        const lengthRequirement = document.getElementById('length');
+        const uppercaseRequirement = document.getElementById('uppercase');
+        const lowercaseRequirement = document.getElementById('lowercase');
+        const numberRequirement = document.getElementById('number');
+        const specialRequirement = document.getElementById('special');
+
+        // Length check
+        if (password.length >= 8) {
+            lengthRequirement.classList.add('valid-requirement');
+            lengthRequirement.classList.remove('invalid-requirement');
+        } else {
+            lengthRequirement.classList.add('invalid-requirement');
+            lengthRequirement.classList.remove('valid-requirement');
+        }
+
+        // Uppercase check
+        if (/[A-Z]/.test(password)) {
+            uppercaseRequirement.classList.add('valid-requirement');
+            uppercaseRequirement.classList.remove('invalid-requirement');
+        } else {
+            uppercaseRequirement.classList.add('invalid-requirement');
+            uppercaseRequirement.classList.remove('valid-requirement');
+        }
+
+        // Lowercase check
+        if (/[a-z]/.test(password)) {
+            lowercaseRequirement.classList.add('valid-requirement');
+            lowercaseRequirement.classList.remove('invalid-requirement');
+        } else {
+            lowercaseRequirement.classList.add('invalid-requirement');
+            lowercaseRequirement.classList.remove('valid-requirement');
+        }
+
+        // Number check
+        if (/[0-9]/.test(password)) {
+            numberRequirement.classList.add('valid-requirement');
+            numberRequirement.classList.remove('invalid-requirement');
+        } else {
+            numberRequirement.classList.add('invalid-requirement');
+            numberRequirement.classList.remove('valid-requirement');
+        }
+
+        // Special character check
+        if (/[!@#$%^&*]/.test(password)) {
+            specialRequirement.classList.add('valid-requirement');
+            specialRequirement.classList.remove('invalid-requirement');
+        } else {
+            specialRequirement.classList.add('invalid-requirement');
+            specialRequirement.classList.remove('valid-requirement');
+        }
+    }
+
+    // Confirm password validation
+    const passwordConfirmInput = document.getElementById('regPasswordConfirm');
+    passwordConfirmInput.addEventListener('input', validatePasswordConfirm);
+
+    function validatePasswordConfirm() {
+        const password = passwordInput.value;
+        const passwordConfirm = passwordConfirmInput.value;
+        const errorDiv = document.getElementById('regPasswordConfirmError');
+
+        if (password !== passwordConfirm) {
+            errorDiv.textContent = "Passwords don't match";
+        } else {
+            errorDiv.textContent = "";
+        }
+    }
+
+    // Frontend form validation before submission
+    function validateAndRegister(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+
+        // Reset error messages
+        document.getElementById('regUsernameError').textContent = "";
+        document.getElementById('regEmailError').textContent = "";
+        document.getElementById('regPasswordError').textContent = "";
+        document.getElementById('regPasswordConfirmError').textContent = "";
+
+        let isValid = true;
+
+        // Validate username
+        if (username.trim() === '') {
+            document.getElementById('regUsernameError').textContent = "Username is required";
+            isValid = false;
+        } else if (username.length < 3) {
+            document.getElementById('regUsernameError').textContent = "Username must be at least 3 characters long";
+            isValid = false;
+        }
+
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            document.getElementById('regEmailError').textContent = "Please enter a valid email address";
+            isValid = false;
+        }
+
+        // Validate password
+        if (password.length < 8) {
+            document.getElementById('regPasswordError').textContent = "Password must be at least 8 characters long";
+            isValid = false;
+        } else if (!/[A-Z]/.test(password)) {
+            document.getElementById('regPasswordError').textContent = "Password must contain at least one uppercase letter";
+            isValid = false;
+        } else if (!/[a-z]/.test(password)) {
+            document.getElementById('regPasswordError').textContent = "Password must contain at least one lowercase letter";
+            isValid = false;
+        } else if (!/[0-9]/.test(password)) {
+            document.getElementById('regPasswordError').textContent = "Password must contain at least one number";
+            isValid = false;
+        } else if (!/[!@#$%^&*]/.test(password)) {
+            document.getElementById('regPasswordError').textContent = "Password must contain at least one special character (!@#$%^&*)";
+            isValid = false;
+        }
+
+        // Validate password confirmation
+        if (password !== passwordConfirm) {
+            document.getElementById('regPasswordConfirmError').textContent = "Passwords don't match";
+            isValid = false;
+        }
+
+        // Submit form if valid
+        if (isValid) {
+            register();
+        }
+
+        return false;
+    }
+
+    function validateAndLogin(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Reset error messages
+        document.getElementById('usernameError').textContent = "";
+        document.getElementById('passwordError').textContent = "";
+
+        let isValid = true;
+
+        // Validate username
+        if (username.trim() === '') {
+            document.getElementById('usernameError').textContent = "Username is required";
+            isValid = false;
+        }
+
+        // Validate password
+        if (password.trim() === '') {
+            document.getElementById('passwordError').textContent = "Password is required";
+            isValid = false;
+        }
+
+        // Submit form if valid
+        if (isValid) {
+            login();
+        }
+
+        return false;
+    }
+
     async function register() {
         const username = document.getElementById('regUsername').value;
         const email = document.getElementById('regEmail').value;
@@ -51,12 +315,46 @@
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 resultDiv.innerHTML = `<div class="status success">Registration successful!</div>
-                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                                      <div>Username: ${data.user.username}</div>
+                                      <div>Email: ${data.user.email}</div>
+                                      <div>${data.message}</div>`;
+
+                // Clear the form
+                document.getElementById('registerForm').reset();
+
+                // Reset password requirements UI
+                document.getElementById('length').classList.remove('valid-requirement', 'invalid-requirement');
+                document.getElementById('uppercase').classList.remove('valid-requirement', 'invalid-requirement');
+                document.getElementById('lowercase').classList.remove('valid-requirement', 'invalid-requirement');
+                document.getElementById('number').classList.remove('valid-requirement', 'invalid-requirement');
+                document.getElementById('special').classList.remove('valid-requirement', 'invalid-requirement');
+
             } else {
-                resultDiv.innerHTML = `<div class="status error">Registration failed!</div>
-                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                resultDiv.innerHTML = `<div class="status error">Registration failed!</div>`;
+
+                // Display specific field errors
+                if (data.errors) {
+                    if (data.errors.username) {
+                        document.getElementById('regUsernameError').textContent = data.errors.username;
+                    }
+                    if (data.errors.email) {
+                        document.getElementById('regEmailError').textContent = data.errors.email;
+                    }
+                    if (data.errors.password) {
+                        document.getElementById('regPasswordError').textContent =
+                            Array.isArray(data.errors.password) ? data.errors.password[0] : data.errors.password;
+                    }
+                    if (data.errors.password_confirm) {
+                        document.getElementById('regPasswordConfirmError').textContent = data.errors.password_confirm;
+                    }
+                    if (data.errors.non_field_errors) {
+                        resultDiv.innerHTML += `<div class="error-message">${data.errors.non_field_errors}</div>`;
+                    }
+                } else {
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
             }
         } catch (error) {
             resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
@@ -87,11 +385,22 @@
                 localStorage.setItem('accessToken', accessToken);
                 localStorage.setItem('refreshToken', refreshToken);
 
-                resultDiv.innerHTML = `<div class="status success">Login successful!</div>`;
+                resultDiv.innerHTML = `<div class="status success">Login successful! Redirecting...</div>`;
                 updateAuthStatus();
+
+                // Redirect to the home page after successful login
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
             } else {
-                resultDiv.innerHTML = `<div class="status error">Login failed!</div>
-                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                resultDiv.innerHTML = `<div class="status error">Login failed!</div>`;
+
+                // Display specific field errors
+                if (data.detail) {
+                    resultDiv.innerHTML += `<div class="error-message">${data.detail}</div>`;
+                } else {
+                    resultDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
             }
         } catch (error) {
             resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;

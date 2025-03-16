@@ -4,38 +4,175 @@
 {% block title %}Currency Exchange API - History{% endblock %}
 {% block history_active %}class="active"{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .filter-container > div {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .history-table th, .history-table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .history-table th {
+        background-color: #f2f2f2;
+        position: sticky;
+        top: 0;
+    }
+
+    .history-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .history-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+        color: #666;
+    }
+
+    #historyResults {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <h1>Exchange Rate History</h1>
 
 <div class="section">
     <h2>Your Exchange Rate Requests</h2>
-    <div>
+
+    <div class="filter-container">
         <div>
             <label for="filterCurrency">Filter by Currency:</label>
-            <input type="text" id="filterCurrency" placeholder="e.g., USD">
+            <select id="filterCurrency">
+                <option value="">All Currencies</option>
+                <!-- Will be populated with JavaScript -->
+            </select>
         </div>
-        <div style="margin-top: 10px;">
+        <div>
             <label for="filterDate">Filter by Date:</label>
             <input type="date" id="filterDate">
         </div>
-        <button onclick="getHistory()" style="margin-top: 10px;">Apply Filters</button>
-        <button onclick="clearFilters()" style="margin-top: 10px; background-color: #f44336;">Clear Filters</button>
     </div>
-    <div id="historyResults" class="result" style="margin-top: 20px;"></div>
+
+    <div class="button-container">
+        <button onclick="getHistory()">Apply Filters</button>
+        <button onclick="clearFilters()" style="background-color: #f44336;">Clear Filters</button>
+    </div>
+
+    <div id="historyResults" class="result">
+        <div class="empty-state">No history data loaded. Click "Apply Filters" to view your history.</div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+    // Currency data with codes, names and symbols
+    const CURRENCIES = [
+        { code: "USD", name: "US Dollar", symbol: "$" },
+        { code: "EUR", name: "Euro", symbol: "€" },
+        { code: "GBP", name: "British Pound", symbol: "£" },
+        { code: "JPY", name: "Japanese Yen", symbol: "¥" },
+        { code: "AUD", name: "Australian Dollar", symbol: "A$" },
+        { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
+        { code: "CHF", name: "Swiss Franc", symbol: "CHF" },
+        { code: "CNY", name: "Chinese Yuan", symbol: "¥" },
+        { code: "HKD", name: "Hong Kong Dollar", symbol: "HK$" },
+        { code: "NZD", name: "New Zealand Dollar", symbol: "NZ$" },
+        { code: "SEK", name: "Swedish Krona", symbol: "kr" },
+        { code: "SGD", name: "Singapore Dollar", symbol: "S$" },
+        { code: "NOK", name: "Norwegian Krone", symbol: "kr" },
+        { code: "MXN", name: "Mexican Peso", symbol: "Mex$" },
+        { code: "INR", name: "Indian Rupee", symbol: "₹" },
+        { code: "BRL", name: "Brazilian Real", symbol: "R$" },
+        { code: "RUB", name: "Russian Ruble", symbol: "₽" },
+        { code: "ZAR", name: "South African Rand", symbol: "R" },
+        { code: "TRY", name: "Turkish Lira", symbol: "₺" },
+        { code: "PLN", name: "Polish Złoty", symbol: "zł" },
+        { code: "THB", name: "Thai Baht", symbol: "฿" },
+        { code: "IDR", name: "Indonesian Rupiah", symbol: "Rp" },
+        { code: "HUF", name: "Hungarian Forint", symbol: "Ft" },
+        { code: "CZK", name: "Czech Koruna", symbol: "Kč" },
+        { code: "ILS", name: "Israeli New Shekel", symbol: "₪" },
+        { code: "KRW", name: "South Korean Won", symbol: "₩" },
+        { code: "AED", name: "United Arab Emirates Dirham", symbol: "د.إ" },
+        { code: "CLP", name: "Chilean Peso", symbol: "CLP$" },
+        { code: "PHP", name: "Philippine Peso", symbol: "₱" },
+        { code: "MYR", name: "Malaysian Ringgit", symbol: "RM" },
+        { code: "COP", name: "Colombian Peso", symbol: "COL$" },
+        { code: "SAR", name: "Saudi Riyal", symbol: "﷼" },
+        { code: "RON", name: "Romanian Leu", symbol: "lei" },
+        { code: "DKK", name: "Danish Krone", symbol: "kr" },
+        { code: "BGN", name: "Bulgarian Lev", symbol: "лв" },
+        { code: "HRK", name: "Croatian Kuna", symbol: "kn" },
+        { code: "MAD", name: "Moroccan Dirham", symbol: "د.م." },
+        { code: "ARS", name: "Argentine Peso", symbol: "AR$" },
+        { code: "PEN", name: "Peruvian Sol", symbol: "S/." },
+        { code: "EGP", name: "Egyptian Pound", symbol: "E£" }
+    ];
+
+    // Set up the page when it loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currencySelect = document.getElementById('filterCurrency');
+
+        // Sort currencies alphabetically by name
+        const sortedCurrencies = [...CURRENCIES].sort((a, b) => a.name.localeCompare(b.name));
+
+        // Add options to select dropdown
+        sortedCurrencies.forEach(currency => {
+            const option = document.createElement('option');
+            option.value = currency.code;
+            option.textContent = `${currency.code} - ${currency.name}`;
+            currencySelect.appendChild(option);
+        });
+
+        // Load history if user is authenticated
+        if (accessToken) {
+            getHistory();
+        }
+    });
+
     async function getHistory() {
         const filterCurrency = document.getElementById('filterCurrency').value;
         const filterDate = document.getElementById('filterDate').value;
         const resultDiv = document.getElementById('historyResults');
-        
+
         if (!accessToken) {
             resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
             return;
         }
+
+        // Show loading state
+        resultDiv.innerHTML = `<div class="status">Loading history data...</div>`;
 
         let url = `${API_BASE_URL}/history/?`;
         if (filterCurrency) {
@@ -65,32 +202,37 @@
             }
 
             const data = await response.json();
-            
+
             if (response.ok) {
                 if (data.length === 0) {
-                    resultDiv.innerHTML = `<div class="status">No exchange rate requests found.</div>`;
+                    resultDiv.innerHTML = `<div class="empty-state">No exchange rate requests found.</div>`;
                     return;
                 }
-                
-                let html = `<table style="width: 100%; border-collapse: collapse;">
+
+                // Create table with history data
+                let html = `<table class="history-table">
                             <thead>
                                 <tr>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Currency</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Rate (UAH)</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date & Time</th>
+                                    <th>Currency</th>
+                                    <th>Rate (UAH)</th>
+                                    <th>Date & Time</th>
                                 </tr>
                             </thead>
                             <tbody>`;
-                
+
                 data.forEach(item => {
+                    // Find currency details
+                    const currency = CURRENCIES.find(c => c.code === item.currency_code) ||
+                                    { code: item.currency_code, name: item.currency_code, symbol: "" };
+
                     const date = new Date(item.created_at).toLocaleString();
                     html += `<tr>
-                              <td style="border: 1px solid #ddd; padding: 8px;">${item.currency_code}</td>
-                              <td style="border: 1px solid #ddd; padding: 8px;">${item.rate}</td>
-                              <td style="border: 1px solid #ddd; padding: 8px;">${date}</td>
+                              <td>${currency.code} - ${currency.name} ${currency.symbol}</td>
+                              <td>${item.rate}</td>
+                              <td>${date}</td>
                             </tr>`;
                 });
-                
+
                 html += `</tbody></table>`;
                 resultDiv.innerHTML = html;
             } else {
@@ -107,12 +249,5 @@
         document.getElementById('filterDate').value = '';
         getHistory();
     }
-
-    // Load history when page loads if user is authenticated
-    document.addEventListener('DOMContentLoaded', function() {
-        if (accessToken) {
-            getHistory();
-        }
-    });
 </script>
 {% endblock %}

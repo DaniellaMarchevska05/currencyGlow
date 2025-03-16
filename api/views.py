@@ -15,6 +15,7 @@ from .serializers import UserRegistrationSerializer, UserBalanceSerializer
 def frontend_view(request):
     return render(request, 'api/index.html')
 
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
@@ -22,11 +23,21 @@ class RegisterView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        if not serializer.is_valid():
+            return Response({
+                "success": False,
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         user = serializer.save()
         return Response({
-            "user": UserRegistrationSerializer(user, context=self.get_serializer_context()).data,
-            "message": "User registered successfully",
+            "success": True,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            },
+            "message": "User registered successfully. You can now log in."
         }, status=status.HTTP_201_CREATED)
 
 
