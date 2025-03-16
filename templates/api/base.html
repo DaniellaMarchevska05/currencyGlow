@@ -103,14 +103,14 @@
         button {
             background: var(--accent-primary);
             color: white;
-            padding: 10px 20px;
+            padding: 14px 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 500;
             transition: all 0.3s;
-            margin-top: 15px;
+            margin-top: 8px;
             box-shadow: 0 4px 15px rgba(126, 95, 255, 0.4);
         }
 
@@ -142,32 +142,51 @@
             box-shadow: 0 6px 20px rgba(255, 42, 109, 0.6);
         }
 
+
         input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 10px 10px;
             margin: 8px 0;
             display: inline-block;
             border: 1px solid var(--input-border);
-            border-radius: 8px;
+            border-radius: 10px;
             box-sizing: border-box;
-            background: var(--input-bg);
+            background: rgba(16, 18, 27, 0.4);
             color: var(--text-color);
             font-family: 'Inter', sans-serif;
-            font-size: 15px;
+            font-size: 16px;
             transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8a8c0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 1em;
+            padding-right: 48px;
+        }
+
+        select option {
+            background-color: rgba(16, 18, 27, 0.95);
+            color: var(--text-color);
+            padding: 10px;
+            font-size: 16px;
         }
 
         input:focus, select:focus {
             outline: none;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 2px rgba(126, 95, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(126, 95, 255, 0.2);
         }
 
         label {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--text-muted);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             display: block;
+            font-weight: 500;
         }
 
         .result {
@@ -282,7 +301,7 @@
     <!-- Continued from Part 1 -->
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .error-message {

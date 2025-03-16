@@ -9,13 +9,32 @@
     .filter-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 15px;
+        gap: 20px;
+        margin-bottom: 25px;
     }
 
     .filter-container > div {
         flex: 1;
-        min-width: 200px;
+        min-width: 220px;
+    }
+
+    .filter-container select,
+    .filter-container input[type="date"] {
+        background-color: rgba(16, 18, 27, 0.5);
+        padding: 16px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .filter-container label {
+        font-size: 15px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .button-container button {
+        padding: 16px 24px;
+        font-size: 16px;
     }
 
     .button-container {

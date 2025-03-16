@@ -4,78 +4,247 @@
 {% block title %}Currency Exchange API - Register/Login{% endblock %}
 {% block register_active %}class="active"{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .auth-tabs {
+        display: flex;
+        margin-bottom: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 6px;
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-muted);
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        letter-spacing: 0.3px;
+    }
+
+    .auth-tab.active {
+        background: var(--accent-primary);
+        color: white;
+        box-shadow: 0 4px 15px rgba(126, 95, 255, 0.4);
+    }
+
+    .auth-tab:not(.active):hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+
+    .auth-content {
+        display: none;
+    }
+
+    .auth-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    /* Enhanced password requirements styling */
+    .password-requirements {
+        font-size: 14px;
+        margin-top: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        border-radius: 10px;
+        line-height: 1.7;
+    }
+
+    .password-requirements ul {
+        margin: 8px 0 0 15px;
+        padding: 0;
+    }
+
+    .valid-requirement {
+        color: var(--success-color);
+        position: relative;
+    }
+
+    .invalid-requirement {
+        color: var(--text-muted);
+    }
+
+    /* Enhanced form styling specific to login/register */
+    #registerForm input, #loginForm input {
+        font-size: 16px;
+        padding: 10px 10px;
+        margin: 10px 0;
+        border-radius: 10px;
+    }
+
+    #registerForm .form-group, #loginForm .form-group {
+        margin-bottom: 10px;
+    }
+
+    #registerForm button, #loginForm button {
+        width: 100%;
+        margin-top: 5px;
+        padding: 16px 10px;
+        font-size: 16px;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+
+    .required {
+        color: var(--error-color);
+        margin-left: 3px;
+        font-size: 18px;
+        vertical-align: middle;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Better spacing for the result divs */
+    #loginResult, #registerResult {
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    /* Improved link styling at the bottom */
+    .auth-footer-link {
+        margin-top: 10px;
+        text-align: center;
+        color: var(--text-muted);
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+    }
+
+    .auth-footer-link a {
+        color: var(--accent-primary);
+        text-decoration: none;
+        font-weight: 600;
+        padding-left: 5px;
+    }
+
+    .auth-footer-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <h1>Account Access</h1>
 
-<div class="section" id="registerSection">
-    <h2>Create Account</h2>
-    <p style="color: var(--text-muted); margin-bottom: 20px;">Register for a new account and receive 1000 coins to start making requests.</p>
+<div class="section">
+    <div class="auth-tabs">
+        <div id="loginTab" class="auth-tab active" onclick="switchTab('login')">Login</div>
+        <div id="registerTab" class="auth-tab" onclick="switchTab('register')">Register</div>
+    </div>
 
-    <form id="registerForm" onsubmit="return validateAndRegister(event)">
-        <div class="form-group">
-            <label for="regUsername">Username <span class="required">*</span></label>
-            <input type="text" id="regUsername" placeholder="Choose a username" required>
-            <div class="error-message" id="regUsernameError"></div>
-        </div>
+    <div id="loginContent" class="auth-content active">
+        <h2>Login</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Sign in to access currency exchange rates.</p>
 
-        <div class="form-group">
-            <label for="regEmail">Email <span class="required">*</span></label>
-            <input type="email" id="regEmail" placeholder="Your email address" required>
-            <div class="error-message" id="regEmailError"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="regPassword">Password <span class="required">*</span></label>
-            <input type="password" id="regPassword" placeholder="Create a strong password" required>
-            <div class="password-requirements">
-                Password must:
-                <ul>
-                    <li id="length">Be at least 8 characters long</li>
-                    <li id="uppercase">Contain at least one uppercase letter</li>
-                    <li id="lowercase">Contain at least one lowercase letter</li>
-                    <li id="number">Contain at least one number</li>
-                    <li id="special">Contain at least one special character (!@#$%^&*)</li>
-                </ul>
+        <form id="loginForm" onsubmit="return validateAndLogin(event)">
+            <div class="form-group">
+                <label for="username">Username <span class="required">*</span></label>
+                <input type="text" id="username" placeholder="Your username" required>
+                <div class="error-message" id="usernameError"></div>
             </div>
-            <div class="error-message" id="regPasswordError"></div>
+
+            <div class="form-group">
+                <label for="password">Password <span class="required">*</span></label>
+                <input type="password" id="password" placeholder="Your password" required>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginResult" class="result"></div>
+
+        <div class="auth-footer-link">
+            Don't have an account yet?
+            <a href="#" onclick="switchTab('register')">Create an account</a>
         </div>
+    </div>
 
-        <div class="form-group">
-            <label for="regPasswordConfirm">Confirm Password <span class="required">*</span></label>
-            <input type="password" id="regPasswordConfirm" placeholder="Confirm your password" required>
-            <div class="error-message" id="regPasswordConfirmError"></div>
+    <div id="registerContent" class="auth-content">
+        <h2>Create Account</h2>
+        <p style="color: var(--text-muted); margin-bottom: 20px;">Register for a new account and receive 1000 coins to start making requests.</p>
+
+        <form id="registerForm" onsubmit="return validateAndRegister(event)">
+            <div class="form-group">
+                <label for="regUsername">Username <span class="required">*</span></label>
+                <input type="text" id="regUsername" placeholder="Choose a username" required>
+                <div class="error-message" id="regUsernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">Email <span class="required">*</span></label>
+                <input type="email" id="regEmail" placeholder="Your email address" required>
+                <div class="error-message" id="regEmailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="regPassword">Password <span class="required">*</span></label>
+                <input type="password" id="regPassword" placeholder="Create a strong password" required>
+                <div class="password-requirements">
+                    Password must:
+                    <ul>
+                        <li id="length">Be at least 8 characters long</li>
+                        <li id="uppercase">Contain at least one uppercase letter</li>
+                        <li id="lowercase">Contain at least one lowercase letter</li>
+                        <li id="number">Contain at least one number</li>
+                        <li id="special">Contain at least one special character (!@#$%^&*)</li>
+                    </ul>
+                </div>
+                <div class="error-message" id="regPasswordError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="regPasswordConfirm">Confirm Password <span class="required">*</span></label>
+                <input type="password" id="regPasswordConfirm" placeholder="Confirm your password" required>
+                <div class="error-message" id="regPasswordConfirmError"></div>
+            </div>
+
+            <button type="submit">Create Account</button>
+        </form>
+        <div id="registerResult" class="result"></div>
+
+        <div class="auth-footer-link">
+            Already have an account?
+            <a href="#" onclick="switchTab('login')">Login instead</a>
         </div>
-
-        <button type="submit">Create Account</button>
-    </form>
-    <div id="registerResult" class="result"></div>
-</div>
-
-<div class="section" id="loginSection">
-    <h2>Login</h2>
-    <p style="color: var(--text-muted); margin-bottom: 20px;">Already have an account? Sign in to continue.</p>
-
-    <form id="loginForm" onsubmit="return validateAndLogin(event)">
-        <div class="form-group">
-            <label for="username">Username <span class="required">*</span></label>
-            <input type="text" id="username" placeholder="Your username" required>
-            <div class="error-message" id="usernameError"></div>
-        </div>
-
-        <div class="form-group">
-            <label for="password">Password <span class="required">*</span></label>
-            <input type="password" id="password" placeholder="Your password" required>
-            <div class="error-message" id="passwordError"></div>
-        </div>
-
-        <button type="submit">Login</button>
-    </form>
-    <div id="loginResult" class="result"></div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
+    // Tab switching logic
+    function switchTab(tab) {
+        // Update tab styles
+        document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+        document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+
+        // Show/hide content
+        document.getElementById('loginContent').classList.toggle('active', tab === 'login');
+        document.getElementById('registerContent').classList.toggle('active', tab === 'register');
+
+        // Clear previous results
+        document.getElementById('loginResult').innerHTML = '';
+        document.getElementById('registerResult').innerHTML = '';
+    }
+
+    // Check if URL has a hash for tab navigation
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash === '#register') {
+            switchTab('register');
+        }
+    });
+
     // Password validation
     const passwordInput = document.getElementById('regPassword');
     passwordInput.addEventListener('input', validatePassword);
@@ -287,6 +456,13 @@
                 document.getElementById('lowercase').classList.remove('valid-requirement', 'invalid-requirement');
                 document.getElementById('number').classList.remove('valid-requirement', 'invalid-requirement');
                 document.getElementById('special').classList.remove('valid-requirement', 'invalid-requirement');
+
+                // Suggest switching to login
+                setTimeout(() => {
+                    resultDiv.innerHTML += `<div style="margin-top: 15px;">
+                                          <button onclick="switchTab('login')">Proceed to Login</button>
+                                        </div>`;
+                }, 1500);
 
             } else {
                 resultDiv.innerHTML = `<div class="status error">Registration failed!</div>`;
