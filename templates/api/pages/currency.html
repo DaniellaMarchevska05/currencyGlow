@@ -1,0 +1,78 @@
+<!-- templates/api/pages/currency.html -->
+{% extends 'api/base.html' %}
+
+{% block title %}Currency Exchange API - Currency Exchange{% endblock %}
+{% block currency_active %}class="active"{% endblock %}
+
+{% block content %}
+<h1>Currency Exchange</h1>
+
+<div class="section">
+    <h2>Get Exchange Rate</h2>
+    <p>Each request costs 1 coin from your balance.</p>
+
+    <select id="currencyCode">
+        <option value="USD">USD - US Dollar</option>
+        <option value="EUR">EUR - Euro</option>
+        <option value="GBP">GBP - British Pound</option>
+        <option value="JPY">JPY - Japanese Yen</option>
+        <option value="CHF">CHF - Swiss Franc</option>
+        <option value="AUD">AUD - Australian Dollar</option>
+        <option value="CAD">CAD - Canadian Dollar</option>
+        <option value="CNY">CNY - Chinese Yuan</option>
+        <option value="PLN">PLN - Polish Zloty</option>
+    </select>
+    <button onclick="getCurrencyRate()">Get Exchange Rate</button>
+    <div id="currencyResult" class="result"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function getCurrencyRate() {
+        const currencyCode = document.getElementById('currencyCode').value;
+        const resultDiv = document.getElementById('currencyResult');
+
+        if (!accessToken) {
+            resultDiv.innerHTML = `<div class="status error">Please log in first!</div>`;
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/currency/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ currency_code: currencyCode }),
+            });
+
+            if (response.status === 401) {
+                // Try to refresh the token
+                const refreshed = await refreshAuthToken();
+                if (refreshed) {
+                    return getCurrencyRate();  // Try again with new token
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Session expired. Please log in again.</div>`;
+                    return;
+                }
+            }
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultDiv.innerHTML = `<div class="status success">Exchange Rate for ${data.currency_code}:</div>
+                                      <div class="status success">1 ${data.currency_code} = ${data.rate} UAH</div>
+                                      <div class="status">Balance remaining: ${data.balance_remaining} coins</div>
+                                      <div class="status">Request time: ${new Date(data.created_at).toLocaleString()}</div>`;
+            } else {
+                resultDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+        }
+    }
+</script>
+{% endblock %}

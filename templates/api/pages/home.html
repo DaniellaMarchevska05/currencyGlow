@@ -1,0 +1,31 @@
+<!-- templates/api/pages/home.html -->
+{% extends 'api/base.html' %}
+
+{% block title %}Currency Exchange API - Home{% endblock %}
+{% block home_active %}class="active"{% endblock %}
+
+{% block content %}
+<h1>Currency Exchange API</h1>
+<div class="section">
+    <h2>Welcome to the Currency Exchange API</h2>
+    <p>This application allows you to:</p>
+    <ul>
+        <li>Register and login to get access to the API</li>
+        <li>Check your balance (each user starts with 1000 coins)</li>
+        <li>Get currency exchange rates to UAH</li>
+        <li>View your exchange rate request history</li>
+    </ul>
+    <p>Each exchange rate request costs 1 coin from your balance.</p>
+</div>
+
+<div class="section">
+    <h2>Getting Started</h2>
+    <p>To begin using the API:</p>
+    <ol>
+        <li>Go to the <a href="/register/">Register/Login</a> page to create an account or login</li>
+        <li>Once logged in, check your <a href="/balance/">Balance</a></li>
+        <li>Make currency exchange requests on the <a href="/currency/">Currency Exchange</a> page</li>
+        <li>View your request history on the <a href="/history/">History</a> page</li>
+    </ol>
+</div>
+{% endblock %}

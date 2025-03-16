@@ -137,3 +137,23 @@ class ExchangeHistoryView(APIView):
         serializer = CurrencyExchangeSerializer(queryset, many=True)
         return Response(serializer.data)
 
+# api/views.py
+
+from django.shortcuts import render
+
+def home_view(request):
+    return render(request, 'api/pages/home.html')
+
+def register_view(request):
+    return render(request, 'api/pages/register.html')
+
+def balance_view(request):
+    return render(request, 'api/pages/balance.html')
+
+def currency_view(request):
+    return render(request, 'api/pages/currency.html')
+
+def history_view(request):
+    return render(request, 'api/pages/history.html')
+
+# Keep the rest of your views...

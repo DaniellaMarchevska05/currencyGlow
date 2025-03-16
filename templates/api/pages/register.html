@@ -1,0 +1,101 @@
+<!-- templates/api/pages/register.html -->
+{% extends 'api/base.html' %}
+
+{% block title %}Currency Exchange API - Register/Login{% endblock %}
+{% block register_active %}class="active"{% endblock %}
+
+{% block content %}
+<h1>Register/Login</h1>
+
+<div class="section" id="registerSection">
+    <h2>Register</h2>
+    <input type="text" id="regUsername" placeholder="Username">
+    <input type="email" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+    <input type="password" id="regPasswordConfirm" placeholder="Confirm Password">
+    <button onclick="register()">Register</button>
+    <div id="registerResult" class="result"></div>
+</div>
+
+<div class="section" id="loginSection">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+    <div id="loginResult" class="result"></div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function register() {
+        const username = document.getElementById('regUsername').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPassword').value;
+        const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+        const resultDiv = document.getElementById('registerResult');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/register/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    password,
+                    password_confirm: passwordConfirm
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultDiv.innerHTML = `<div class="status success">Registration successful!</div>
+                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                resultDiv.innerHTML = `<div class="status error">Registration failed!</div>
+                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+        }
+    }
+
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const resultDiv = document.getElementById('loginResult');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/token/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                accessToken = data.access;
+                refreshToken = data.refresh;
+
+                // Store tokens
+                localStorage.setItem('accessToken', accessToken);
+                localStorage.setItem('refreshToken', refreshToken);
+
+                resultDiv.innerHTML = `<div class="status success">Login successful!</div>`;
+                updateAuthStatus();
+            } else {
+                resultDiv.innerHTML = `<div class="status error">Login failed!</div>
+                                      <pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+        }
+    }
+</script>
+{% endblock %}
