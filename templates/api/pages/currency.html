@@ -7,7 +7,7 @@
 {% block extra_styles %}
 <style>
     .currency-result-card {
-        margin-top: 30px;
+        margin-top: 10px;
         background: rgba(0, 0, 0, 0.2);
         border-radius: 16px;
         padding: 0;
@@ -16,7 +16,7 @@
     }
 
     .currency-result-header {
-        padding: 15px 20px;
+        padding: 15px 10px;
         background: rgba(126, 95, 255, 0.2);
         display: flex;
         justify-content: space-between;
@@ -24,7 +24,7 @@
     }
 
     .currency-result-body {
-        padding: 20px;
+        padding: 10px;
     }
 
     .currency-rate {
@@ -63,7 +63,7 @@
     }
 
     .currency-selector {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
 
         .currency-selector select {
@@ -84,6 +84,110 @@
         padding: 16px 24px;
         font-size: 16px;
     }
+
+        /* Zero Balance Error Styling */
+    .zero-balance-error {
+        background: rgba(20, 20, 40, 0.6);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        margin: 10px 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 42, 109, 0.2);
+    }
+
+    .zero-balance-header {
+        background: rgba(255, 42, 109, 0.15);
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 42, 109, 0.2);
+    }
+
+    .zero-balance-header svg {
+        margin-right: 10px;
+        filter: drop-shadow(0 0 8px rgba(255, 42, 109, 0.5));
+    }
+
+    .zero-balance-header h3 {
+        margin: 0;
+        color: white;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .zero-balance-content {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .zero-balance-content p {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .balance-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 5px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        border-radius: 10px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .info-label {
+        display: block;
+        color: var(--text-muted);
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .info-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+
+    .zero-balance-actions {
+        padding: 5px;
+        background: rgba(0, 0, 0, 0.15);
+        display: flex;
+        justify-content: center;
+        margin-top: 5px;
+    }
+
+    .zero-balance-actions button {
+        background: var(--accent-primary);
+        color: white;
+        padding: 10px 10px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 4px 15px rgba(126, 95, 255, 0.4);
+    }
+
+    .zero-balance-actions button:hover {
+        background: #8f6aff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(126, 95, 255, 0.6);
+    }
+
+    .zero-balance-actions button svg {
+        opacity: 0.9;
+    }
+
 </style>
 {% endblock %}
 
@@ -259,8 +363,52 @@
                 }
             } else {
                 errorDiv.style.display = "block";
-                errorDiv.innerHTML = `<div class="status error">Request failed!</div>
-                                    <pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+                // Replace the zero balance error section in the getCurrencyRate() function
+                if (response.status === 403 &&
+                    (data.error === "Insufficient balance" ||
+                     data.detail?.toLowerCase().includes("balance") ||
+                     data.detail?.toLowerCase().includes("credit"))) {
+
+                    // Show a beautifully designed error message with a top-up button
+                    errorDiv.innerHTML = `
+                        <div class="zero-balance-error">
+                            <div class="zero-balance-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 22C6.477 22 2 17.523 2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22ZM12 20C16.418 20 20 16.418 20 12C20 7.582 16.418 4 12 4C7.582 4 4 7.582 4 12C4 16.418 7.582 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z" fill="#FF2A6D"/>
+                                </svg>
+                                <h3>Insufficient Balance</h3>
+                            </div>
+
+                            <div class="zero-balance-content">
+                                <p>You don't have enough credits to make this request.</p>
+                                <div class="balance-info">
+                                    <div>
+                                        <span class="info-label">Current Balance:</span>
+                                        <span class="info-value">0 credits</span>
+                                    </div>
+                                    <div>
+                                        <span class="info-label">Cost Per Request:</span>
+                                        <span class="info-value">1 credit</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="zero-balance-actions">
+                                <button onclick="window.location.href='/balance/'">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 22C6.477 22 2 17.523 2 12C2 6.477 6.477 2 12 2C17.523 2 22 6.477 22 12C22 17.523 17.523 22 12 22ZM12 20C16.418 20 20 16.418 20 12C20 7.582 16.418 4 12 4C7.582 4 4 7.582 4 12C4 16.418 7.582 20 12 20ZM11 7H13V13H11V7ZM11 15H13V17H11V15Z" fill="currentColor"/>
+                                    </svg>
+                                    Go to Balance Page
+                                </button>
+                            </div>
+                        </div>`;
+                } else {
+                    // Show the generic error for other cases
+                    errorDiv.innerHTML = `<div class="status error">Request failed!</div>
+                                        <pre>${JSON.stringify(data, null, 2)}</pre>`;
+                }
+
             }
         } catch (error) {
             loadingIndicator.style.display = "none";
@@ -269,5 +417,6 @@
             errorDiv.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
         }
     }
+
 </script>
 {% endblock %}
