@@ -54,11 +54,15 @@ pip install -r requirements.txt
 
 ### Environment Variables
 
-Create a `.env` file in the project root with your variables.
+Create a `.env` file in the project root. Copy all needed environment variables names from .env.example and paste them into .env
 
 ### PostgreSQL DB
 
 - in PostgreSQL create an empty database and put it`s properties in .env
+
+### EXCHANGE_RATE_API_KEY
+
+- get your EXCHANGE_RATE_API_KEY for .env here: [https://www.exchangerate-api.com/](https://www.exchangerate-api.com/)
 
 ### Run Migrations
 
@@ -169,6 +173,12 @@ Access the application at [http://localhost:8000](http://localhost:8000)
 
 ![image](https://github.com/user-attachments/assets/1b494cb7-a34c-443a-9a70-7ea76e415e30)
 
+### Viewing Balance
+
+1. Navigate to the Balance page (`/balance/`) to see your balance
+
+![image](https://github.com/user-attachments/assets/426e8bf4-f5f0-4684-9385-ced6359d5c40)
+
 ### Errors Handling
 
 1. When the user\`s balance reaches 0 he or she can`t get the exchange rate
@@ -181,6 +191,23 @@ Access the application at [http://localhost:8000](http://localhost:8000)
 
 ![image](https://github.com/user-attachments/assets/91fedf84-00d7-490a-8822-2c21a86a8db1)
 
+3. Unregistered users can`t login
+
+![image](https://github.com/user-attachments/assets/f56d0059-10d7-4b17-b20b-90308f967c72)
+
+## Database Preview 
+
+1. Table: user
+
+![image](https://github.com/user-attachments/assets/6c2f27bd-3954-45e1-9fdf-80819808eada)
+
+2. Table: currencyexchange
+
+![image](https://github.com/user-attachments/assets/aa1cba33-feb9-41f7-a968-634223080a25)
+
+3. Table: userbalance
+
+![image](https://github.com/user-attachments/assets/9d5a0b29-0a82-42f8-8280-f9cd4a27c3e8)
 
 ### Technical Implementation
 
