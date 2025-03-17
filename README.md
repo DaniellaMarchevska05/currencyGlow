@@ -14,7 +14,10 @@ A sleek, modern exchange rate application with a credit-based system and stunnin
 - [Technology Stack](#-technology-stack)
 - [Installation](#-installation)
 - [API Documentation](#-api-documentation)
+- [App Structure](#-app-structure)
 - [Usage](#-usage)
+- [Errors Handling](#-errors-handling)
+- [Database Preview](#-database-preview)
 
 ## 💻 Technology Stack
 
@@ -179,7 +182,7 @@ Access the application at [http://localhost:8000](http://localhost:8000)
 
 ![image](https://github.com/user-attachments/assets/426e8bf4-f5f0-4684-9385-ced6359d5c40)
 
-### Errors Handling
+## 🪲 Errors Handling
 
 1. When the user\`s balance reaches 0 he or she can`t get the exchange rate
 
@@ -195,7 +198,7 @@ Access the application at [http://localhost:8000](http://localhost:8000)
 
 ![image](https://github.com/user-attachments/assets/f56d0059-10d7-4b17-b20b-90308f967c72)
 
-## Database Preview 
+## 📕 Database Preview 
 
 1. Table: user
 
