@@ -160,6 +160,7 @@ Access the application at [http://localhost:8000](http://localhost:8000)
 2. Select a currency from the dropdown menu
    
 ![image](https://github.com/user-attachments/assets/3eb5c444-14d5-4d94-85a0-9726e7abe75e)
+![image](https://github.com/user-attachments/assets/60391bd3-cb16-4d90-9559-67ed936906f3)
 
 4. Click "Get Exchange Rate" to see the current rate against UAH
 
