@@ -121,7 +121,7 @@ class CurrencyExchangeView(APIView):
 
 
 # api/views.py
-# Add to existing file along with other views
+
 
 class ExchangeHistoryView(APIView):
     permission_classes = (IsAuthenticated,)
