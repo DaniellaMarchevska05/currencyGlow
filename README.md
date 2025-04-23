@@ -13,6 +13,8 @@ A sleek, modern exchange rate application with a credit-based system and stunnin
 
 - [Technology Stack](#-technology-stack)
 - [Installation](#-installation)
+  - [Using Docker (Recommended)](#using-docker-recommended)
+  - [Manual Installation](#manual-installation)
 - [API Documentation](#-api-documentation)
 - [App Structure](#-app-structure)
 - [Usage](#-usage)
@@ -28,6 +30,32 @@ A sleek, modern exchange rate application with a credit-based system and stunnin
 - **Database**: PostgreSQL
 
 ## 📥 Installation
+
+### Using Docker (Recommended)
+
+Prerequisites:
+- Docker and Docker Compose
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/DaniellaMarchevska05/currencyGlow.git
+   ```
+   
+2. **Create Environment File**
+   ```bash
+   # Copy the example file and edit as needed
+   cp .env.example .env
+   ```
+   
+3. **Build and Run with Docker**
+   ```bash
+   cd currencyGlow
+   docker-compose up --build
+   ```
+4. **Access the Application**
+[http://localhost:8000](http://localhost:8000)
+
+### Manual installation 
 
 ### Prerequisites
 
